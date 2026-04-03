@@ -1,7 +1,7 @@
 # Afisare Confusion Matrix
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import precision_recall_curve
 import matplotlib.pyplot as plt
-
 
 def plot_confusion_matrix(y_true, y_pred, title="Confusion Matrix", cmap="PuRd"):
     cm = confusion_matrix(y_true, y_pred)
@@ -39,31 +39,6 @@ def plot_pr_curve(y_val, y_val_proba, y_test, y_test_proba,
     plt.xlabel("Recall")
     plt.ylabel("Precision")
     plt.title(f"{model_name} - Precision-Recall Curve")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-
-
-import matplotlib.pyplot as plt
-from sklearn.metrics import roc_curve
-
-def plot_roc_curve(
-    y_val, y_val_proba,
-    y_test, y_test_proba,
-    val_metrics,
-    test_metrics,
-    model_name="Model"
-):
-    fpr_val, tpr_val, _ = roc_curve(y_val, y_val_proba)
-    fpr_test, tpr_test, _ = roc_curve(y_test, y_test_proba)
-
-    plt.figure(figsize=(7, 5))
-    plt.plot(fpr_val, tpr_val, label=f"Validation ROC-AUC = {val_metrics['ROC-AUC']:.4f}")
-    plt.plot(fpr_test, tpr_test, label=f"Test ROC-AUC = {test_metrics['ROC-AUC']:.4f}")
-    plt.plot([0, 1], [0, 1], linestyle="--")
-    plt.xlabel("False Positive Rate")
-    plt.ylabel("True Positive Rate")
-    plt.title(f"{model_name} - ROC Curve")
     plt.legend()
     plt.grid(True)
     plt.show()

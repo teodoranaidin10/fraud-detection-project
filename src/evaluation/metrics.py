@@ -1,30 +1,75 @@
-# Functie generica de evaluare
-def evaluate_model(y_true, y_pred, y_proba, dataset_name="Dataset", model_name="Model"):
-    acc = accuracy_score(y_true, y_pred)
-    prec = precision_score(y_true, y_pred, zero_division=0)
-    rec = recall_score(y_true, y_pred, zero_division=0)
-    f1 = f1_score(y_true, y_pred, zero_division=0)
-    roc_auc = roc_auc_score(y_true, y_proba)
-    pr_auc = average_precision_score(y_true, y_proba)
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    average_precision_score
+)
 
-    print(f"\n===== {model_name} | Evaluare pentru {dataset_name} =====")
-    print(f"Accuracy  : {acc:.6f}")
-    print(f"Precision : {prec:.6f}")
-    print(f"Recall    : {rec:.6f}")
-    print(f"F1-score  : {f1:.6f}")
-    print(f"ROC-AUC   : {roc_auc:.6f}")
-    print(f"PR-AUC    : {pr_auc:.6f}")
 
-    print("\nClassification Report:")
-    print(classification_report(y_true, y_pred, digits=6, zero_division=0))
-
-    return {
-        "Model": model_name,
-        "Dataset": dataset_name,
-        "Accuracy": acc,
-        "Precision": prec,
-        "Recall": rec,
-        "F1-score": f1,
-        "ROC-AUC": roc_auc,
-        "PR-AUC": pr_auc
+def compute_classification_metrics(y_true, y_pred, y_proba):
+    """
+    Calculează metricile principale pentru clasificare binară.
+    Returnează un dicționar.
+    """
+    metrics = {
+        "Accuracy": accuracy_score(y_true, y_pred),
+        "Precision": precision_score(y_true, y_pred, zero_division=0),
+        "Recall": recall_score(y_true, y_pred, zero_division=0),
+        "F1-score": f1_score(y_true, y_pred, zero_division=0),
+        "ROC-AUC": roc_auc_score(y_true, y_proba),
+        "PR-AUC": average_precision_score(y_true, y_proba)
     }
+    return metrics
+
+
+def print_metrics(metrics, dataset_name="Dataset", model_name="Model"):
+    """
+    Afișează frumos metricile în consolă.
+    """
+    print(f"\n===== {model_name} | {dataset_name} =====")
+    for metric_name, value in metrics.items():
+        print(f"{metric_name}: {value:.6f}")
+
+
+def evaluate_model(y_true, y_pred, y_proba, dataset_name="Dataset", model_name="Model"):
+    """
+    Calculează și afișează metricile.
+    Returnează un dicționar cu rezultatele.
+    """
+    metrics = compute_classification_metrics(y_true, y_pred, y_proba)
+    print_metrics(metrics, dataset_name=dataset_name, model_name=model_name)
+    return metrics
+
+
+def metrics_to_dataframe(results_dict):
+    """
+    Transformă un dicționar de forma:
+    {
+        "RF Baseline - Validation": {...},
+        "RF Baseline - Test": {...},
+        ...
+    }
+    într-un DataFrame pandas.
+    """
+    df = pd.DataFrame(results_dict).T
+    return df
+
+
+def compare_models(results_dict, sort_by=None, ascending=False):
+    """
+    Creează un DataFrame comparativ pentru mai multe modele.
+
+    Parameters:
+    - results_dict: dict cu metrici
+    - sort_by: numele metricii după care se sortează (opțional)
+    - ascending: sensul sortării
+    """
+    df = metrics_to_dataframe(results_dict)
+
+    if sort_by is not None and sort_by in df.columns:
+        df = df.sort_values(by=sort_by, ascending=ascending)
+
+    return df
